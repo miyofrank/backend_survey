@@ -22,3 +22,7 @@ class Encuesta(BaseModel):
     fechaCreacion: datetime
     fechaModificacion: datetime
     preguntas: List[Pregunta]
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.strftime('%Y-%m-%d %H:%M')
+        }
