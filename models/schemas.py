@@ -7,7 +7,7 @@ class Opcion(BaseModel):
 class Pregunta(BaseModel):
     id: str
     texto: str
-    tipo: str  # 'texto', 'opcion_unica', 'opcion_multiple', 'nps', etc.
+    tipo: str
     opciones: Optional[List[Opcion]] = []
 
 class Encuesta(BaseModel):

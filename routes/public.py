@@ -12,3 +12,4 @@ def get_encuesta_publica(idEncuesta: str):
 @router.post("/respuestas/encuesta/{idEncuesta}/public")
 def post_respuesta_publica(idEncuesta: str, respuesta: Respuesta):
     return guardar_respuesta_publica(idEncuesta, respuesta)
+

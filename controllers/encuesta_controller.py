@@ -6,6 +6,9 @@ from services.encuesta_service import get_encuesta_by_id
 from services import encuesta_service
 from services.respuesta_service import calcular_resumen_respuestas
 from services.encuesta_service import calcular_resumen_encuesta
+from fastapi import HTTPException
+from services.encuesta_service import get_encuesta_by_id
+from models.schemas import Encuesta as PublicEncuesta, Pregunta as PublicPregunta, Opcion
 
 def get_all(uid: str):
     return encuesta_service.get_all_by_user(uid)
@@ -32,10 +35,29 @@ def delete(idEncuesta: str, uid: str):
     return {"message": "Encuesta eliminada"}
 
 def obtener_encuesta_publica(idEncuesta: str):
-    encuesta = get_encuesta_by_id(idEncuesta)
-    if not encuesta:
+    raw = get_encuesta_by_id(idEncuesta)
+    if not raw:
         raise HTTPException(status_code=404, detail="Encuesta no encontrada")
-    return encuesta
+
+    # Mapeo al esquema público
+    preguntas = []
+    for p in raw.get("preguntas", []):
+        opciones = [Opcion(texto=o["contenido"]) for o in p.get("items", [])]
+        preguntas.append(
+            PublicPregunta(
+                id=p["idPregunta"],
+                texto=p["texto"],
+                tipo=p["tipo"],
+                opciones=opciones
+            )
+        )
+
+    public = PublicEncuesta(
+        id=raw["id"],
+        titulo=raw.get("nombre", ""),   # renombramos 'nombre' → 'titulo'
+        preguntas=preguntas
+    )
+    return public
     
 def obtener_resumen_encuesta(idEncuesta: str):
     return calcular_resumen_respuestas(idEncuesta)
