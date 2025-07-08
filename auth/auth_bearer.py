@@ -1,5 +1,5 @@
 
-from fastapi import Request, HTTPException
+from fastapi import Depends, Request, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from firebase_admin import auth
 
@@ -17,3 +17,9 @@ class JWTBearer(HTTPBearer):
             except Exception:
                 raise HTTPException(status_code=401, detail="Token inválido o expirado")
         raise HTTPException(status_code=403, detail="No se proporcionaron credenciales")
+
+def get_current_user(token: str = Depends(JWTBearer())):
+    """
+    Extrae el usuario autenticado desde el token JWT verificado previamente.
+    """
+    return auth.verify_id_token(token)
