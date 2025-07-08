@@ -3,7 +3,9 @@
 from fastapi import APIRouter, Depends, Request
 from controllers import encuesta_controller
 from models.encuesta_model import Encuesta
-from auth.auth_bearer import JWTBearer
+from auth.auth_bearer import JWTBearer, get_current_user
+from controllers.encuesta_controller import obtener_resumen_encuesta
+
 
 router = APIRouter()
 
@@ -31,3 +33,11 @@ def update(idEncuesta: str, encuesta: Encuesta, request: Request):
 def delete(idEncuesta: str, request: Request):
     uid = request.state.user["uid"]
     return encuesta_controller.delete(idEncuesta, uid)
+
+@router.get("/encuestas/{idEncuesta}/resultados/resumen", dependencies=[Depends(JWTBearer())])
+def get_resumen_encuesta(idEncuesta: str):
+    return obtener_resumen_encuesta(idEncuesta)
+
+@router.get("/encuestas/{idEncuesta}/resultados/resumen", dependencies=[Depends(JWTBearer())])
+def resumen_encuesta(idEncuesta: str, user_data: dict = Depends(get_current_user)):
+    return encuesta_controller.obtener_resumen_encuesta_controller(idEncuesta, user_data["uid"])
