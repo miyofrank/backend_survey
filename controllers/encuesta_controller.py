@@ -39,21 +39,23 @@ def obtener_encuesta_publica(idEncuesta: str):
     if not raw:
         raise HTTPException(status_code=404, detail="Encuesta no encontrada")
 
-    # Mapeo al esquema público
+    # Asegurar IDs únicos y no nulos en las preguntas
     preguntas = []
-    for p in raw.get("preguntas", []):
-        opciones = [Opcion(texto=o["contenido"]) for o in p.get("items", [])]
+    for idx, p in enumerate(raw.get("preguntas", [])):
+        # Generar fallback de idPregunta si viene null, undefined o duplicado
+        qid = p.get("idPregunta") or f"pregunta-{idx}"
+        opciones = [Opcion(texto=o.get("contenido", "")) for o in p.get("items", [])]
         preguntas.append(
             PublicPregunta(
-                id=p["idPregunta"],
-                texto=p["texto"],
-                tipo=p["tipo"],
+                id=qid,
+                texto=p.get("texto", ""),
+                tipo=p.get("tipo", ""),
                 opciones=opciones
             )
         )
 
     public = PublicEncuesta(
-        id=raw["id"],
+        id=raw.get("id", ""),
         titulo=raw.get("nombre", ""),   # renombramos 'nombre' → 'titulo'
         preguntas=preguntas
     )
