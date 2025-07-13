@@ -22,9 +22,9 @@ def create(respuesta: Respuesta, uid: str):
 def guardar_respuesta_publica(idEncuesta: str, respuesta: Respuesta):
     respuesta_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().isoformat()
+    # llama a la función que ahora duplica el guardado
     guardar_respuesta_firestore(idEncuesta, respuesta_id, respuesta, timestamp)
     return {"status": "ok", "id": respuesta_id}
-
 
 def obtener_respuestas_individuales_controller(id_encuesta: str, user_id: str):
     respuestas = obtener_respuestas_por_encuesta(id_encuesta, user_id)

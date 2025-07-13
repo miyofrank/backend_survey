@@ -48,3 +48,25 @@ def obtener_respuestas_por_encuesta(id_encuesta: str, user_id: str):
     query = respuestas_ref.where("encuestaId", "==", id_encuesta).where("usuarioId", "==", user_id)
     docs = query.stream()
     return [doc.to_dict() for doc in docs]
+
+def guardar_respuesta_publica(idEncuesta, respuesta_id, respuesta_obj, timestamp):
+    # 1) guardado en nested collection (ya existía)
+    db.collection("respuestas")\
+      .document(idEncuesta)\
+      .collection("items")\
+      .document(respuesta_id)\
+      .set({
+        "timestamp": timestamp,
+        "respuestas": [r.dict() for r in respuesta_obj.respuestas]
+    })
+
+    # 2) guardado en colección raíz para consulta protegida
+    db.collection("respuestas")\
+      .document(respuesta_id)\
+      .set({
+        "idRespuesta": respuesta_id,
+        "idEncuesta": idEncuesta,
+        "idPersona": None,            # o "public" si quieres marcarlo
+        "respuestas": [r.dict() for r in respuesta_obj.respuestas],
+        "fechaRespuesta": timestamp
+    })
