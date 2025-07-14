@@ -9,7 +9,7 @@ router = APIRouter()
 def get_encuesta_publica(idEncuesta: str):
     return obtener_encuesta_publica(idEncuesta)
 
-@router.post("/respuestas/encuesta/{idEncuesta}/public")
-def post_respuesta_publica(idEncuesta: str, respuesta: Respuesta):
-    return guardar_respuesta_publica(idEncuesta, respuesta)
 
+@router.post("/respuestas/encuesta/{idEncuesta}/public", tags=["Público"])
+def responder_encuesta_publica(idEncuesta: str, respuesta: Respuesta):
+    return guardar_respuesta_publica(idEncuesta, respuesta)

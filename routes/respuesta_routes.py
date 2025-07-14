@@ -1,23 +1,42 @@
-# routes/respuesta_routes.py
 from fastapi import APIRouter, Depends, Request
-from controllers import respuesta_controller
 from models.respuesta_model import Respuesta
+from controllers.respuesta_controller import (
+    get_all,
+    create,
+    get_by_encuesta_controller,
+    guardar_respuesta_publica,
+    get_public_respuestas,
+)
 from auth.auth_bearer import JWTBearer
-from controllers.respuesta_controller import get_by_encuesta_controller
 
-# Quitamos el prefix aquí para que no se duplique al incluirlo en main.py
 router = APIRouter(
-    tags=["Respuestas"],
-    dependencies=[Depends(JWTBearer())],
+    prefix="/respuestas",
+    tags=["Respuestas"]
 )
 
-@router.get("/encuesta/{idEncuesta}", summary="Obtener todas las respuestas de una encuesta")
-def respuestas_por_encuesta(idEncuesta: str, request: Request):
-    # request.state.user["uid"] ya está validado por JWTBearer(), 
-    # pero no lo usamos para filtrar aquí
-    return get_by_encuesta_controller(idEncuesta)
+# ─── RUTAS PROTEGIDAS (requieren JWT) ─────────────────────────────────
 
-@router.post("/", summary="Crear una nueva respuesta")
-def create(respuesta: Respuesta, request: Request):
+@router.get("/", dependencies=[Depends(JWTBearer())])
+def listar_todas(request: Request):
     uid = request.state.user["uid"]
-    return respuesta_controller.create(respuesta, uid)
+    return get_all(uid)
+
+@router.post("/", dependencies=[Depends(JWTBearer())])
+def crear_protegida(respuesta: Respuesta, request: Request):
+    uid = request.state.user["uid"]
+    return create(respuesta, uid)
+
+@router.get("/encuesta/{idEncuesta}", dependencies=[Depends(JWTBearer())])
+def listar_por_encuesta_protegida(idEncuesta: str, request: Request):
+    uid = request.state.user["uid"]
+    return get_by_encuesta_controller(idEncuesta, uid)
+
+# ─── RUTAS PÚBLICAS (anónimas) ────────────────────────────────────────
+
+@router.post("/encuesta/{idEncuesta}/public")
+def crear_publica(idEncuesta: str, respuesta: Respuesta):
+    return guardar_respuesta_publica(idEncuesta, respuesta)
+
+@router.get("/encuesta/{idEncuesta}/public")
+def listar_por_encuesta_publica(idEncuesta: str):
+    return get_public_respuestas(idEncuesta)
