@@ -6,7 +6,7 @@ from models.schemas import Respuesta
 from services.respuesta_service import guardar_respuesta_firestore
 from datetime import datetime
 from fastapi import HTTPException
-from services.respuesta_service import obtener_respuestas_por_encuesta
+from services.respuesta_service import obtener_respuestas_por_encuesta, guardar_respuesta_publica as svc_guardar_publica
 import uuid
 
 def get_all(uid: str):
@@ -20,10 +20,17 @@ def create(respuesta: Respuesta, uid: str):
     return respuesta_service.create(respuesta)
 
 def guardar_respuesta_publica(idEncuesta: str, respuesta: Respuesta):
+    """
+    Controlador para guardar una respuesta pública.
+    Genera un ID único y timestamp, y delega en el servicio.
+    """
     respuesta_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().isoformat()
-    # llama a la función que ahora duplica el guardado
-    guardar_respuesta_firestore(idEncuesta, respuesta_id, respuesta, timestamp)
+    try:
+        svc_guardar_publica(idEncuesta, respuesta_id, respuesta, timestamp)
+    except Exception as e:
+        # Atrapa errores de Firestore y devuelve 400
+        raise HTTPException(status_code=400, detail=f"No se pudo guardar la respuesta: {e}")
     return {"status": "ok", "id": respuesta_id}
 
 def obtener_respuestas_individuales_controller(id_encuesta: str, user_id: str):

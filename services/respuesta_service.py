@@ -50,38 +50,46 @@ def obtener_respuestas_por_encuesta(id_encuesta: str, user_id: str):
     return [doc.to_dict() for doc in docs]
 
 def guardar_respuesta_publica(idEncuesta, respuesta_id, respuesta_obj, timestamp):
-    # 1) guardado en nested collection (ya existía)
-    db.collection("respuestas")\
-      .document(idEncuesta)\
-      .collection("items")\
-      .document(respuesta_id)\
+    """
+    Guarda la respuesta en:
+      1) Subcolección anidada: /respuestas/{idEncuesta}/items/{respuesta_id}
+      2) Colección raíz:    /respuestas/{respuesta_id}
+    """
+    # 1) Subcolección anidada
+    db.collection("respuestas") \
+      .document(idEncuesta) \
+      .collection("items") \
+      .document(respuesta_id) \
       .set({
         "timestamp": timestamp,
         "respuestas": [r.dict() for r in respuesta_obj.respuestas]
     })
 
-    # 2) guardado en colección raíz para consulta protegida
-    db.collection("respuestas")\
-      .document(respuesta_id)\
+    # 2) Colección raíz para consultas públicas
+    db.collection("respuestas") \
+      .document(respuesta_id) \
       .set({
         "idRespuesta": respuesta_id,
         "idEncuesta": idEncuesta,
-        "idPersona": None,            # o "public" si quieres marcarlo
+        "idPersona": None,  # Público/anónimo
         "respuestas": [r.dict() for r in respuesta_obj.respuestas],
         "fechaRespuesta": timestamp
     })
 
 def get_items_publicos(idEncuesta: str):
     """
-    Lee los documentos bajo:
-      respuestas/{idEncuesta}/items/{respuestaId}
-    y devuelve la lista de {timestamp, respuestas: […]}.
+    Devuelve las respuestas públicas desde la subcolección /respuestas/{idEncuesta}/items
     """
-    items = (
-        db
-        .collection("respuestas")
-        .document(idEncuesta)
-        .collection("items")
-        .stream()
-    )
-    return [doc.to_dict() for doc in items]
+    docs = db.collection("respuestas").document(idEncuesta).collection("items")\
+        .order_by("timestamp").stream()
+
+    items = []
+    for doc in docs:
+        data = doc.to_dict()
+        items.append({
+            "timestamp": data.get("timestamp"),
+            "respuestas": data.get("respuestas", [])
+        })
+    return items
+
+
