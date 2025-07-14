@@ -4,7 +4,6 @@ from fastapi import HTTPException
 from models.encuesta_model import Encuesta
 from services.encuesta_service import get_encuesta_by_id
 from services import encuesta_service
-from services.respuesta_service import calcular_resumen_respuestas
 from services.encuesta_service import calcular_resumen_encuesta
 from fastapi import HTTPException
 from services.encuesta_service import get_encuesta_by_id
@@ -60,9 +59,7 @@ def obtener_encuesta_publica(idEncuesta: str):
         preguntas=preguntas
     )
     return public
-    
-def obtener_resumen_encuesta(idEncuesta: str):
-    return calcular_resumen_respuestas(idEncuesta)
+
 
 
 def obtener_resumen_encuesta_controller(id_encuesta: str, user_id: str):
