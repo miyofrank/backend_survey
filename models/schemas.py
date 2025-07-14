@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import List, Optional, Union
 
 class Opcion(BaseModel):
+    idOpcion: str
     texto: str
 
 class Pregunta(BaseModel):

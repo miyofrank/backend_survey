@@ -48,7 +48,14 @@ def obtener_encuesta_publica(idEncuesta: str) -> PublicEncuesta:
                 status_code=500,
                 detail=f"Pregunta sin 'idPregunta' detectada en la encuesta {idEncuesta}"
             )
-        opciones = [Opcion(texto=o.get("contenido", "")) for o in p.get("items", [])]
+        opciones = [
+    Opcion(
+        idOpcion=o.get("idOpcion") or o.get("idItem") or f"item-{idx}", 
+        texto=o.get("contenido") or o.get("texto") or ""
+    )
+    for idx, o in enumerate(p.get("items", []))
+]
+
         preguntas.append(
             PublicPregunta(
                 idPregunta=qid,
