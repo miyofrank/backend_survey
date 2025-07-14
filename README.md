@@ -1,135 +1,186 @@
-#🚀 Backend del Sistema Web de Encuestas 🚀
-¡Bienvenido al corazón del Sistema Web de Encuestas! Este backend, construido con FastAPI, es el motor que impulsa todas las funcionalidades, desde la gestión de usuarios hasta la creación de dashboards dinámicos. Usamos Firestore como nuestra base de datos, garantizando flexibilidad y escalabilidad.
+# 🚀 Backend del Sistema Web de Encuestas
 
-✨ Características Principales
-Autenticación Robusta: Implementamos la autenticación de usuarios a través de Firebase Authentication, asegurando un registro e inicio de sesión seguros.
+Bienvenido al **Backend del Sistema Web de Encuestas**, desarrollado con **FastAPI** y **Firestore**. Este servicio gestiona desde la autenticación hasta el análisis de resultados, permitiendo crear encuestas dinámicas y visualizar dashboards personalizados.
 
-Gestión Integral de Encuestas: Realiza operaciones CRUD (Crear, Leer, Actualizar, Eliminar) en encuestas. También puedes obtener encuestas específicas, todas las encuestas de un usuario o acceder a encuestas públicas.
+## ✨ Características Principales
 
-Manejo Eficiente de Respuestas: Registra respuestas de usuarios autenticados y también permite respuestas anónimas para encuestas públicas. Podrás consultar respuestas por encuesta o ver todas las respuestas de un usuario, además de obtener resúmenes detallados de los resultados.
+- **🔐 Autenticación Firebase:** Registro y login seguros mediante **Firebase Authentication**.
+- **📝 Gestión de Encuestas:** Crea, edita, elimina y consulta encuestas públicas o privadas.
+- **📈 Respuestas Públicas y Privadas:** Recoge respuestas anónimas o autenticadas y obtén resúmenes estadísticos.
+- **📈 Dashboards Dinámicos:** Crea dashboards personalizados con widgets y gráficos interactivos.
+- **🚀 Firestore NoSQL:** Base de datos flexible y escalable.
+- **🧽 Documentación Interactiva:** Swagger UI disponible en `/docs`.
 
-Dashboards Personalizables: Crea y visualiza dashboards interactivos para analizar los resultados de tus encuestas. Configura widgets con diferentes tipos de gráficos para una mejor comprensión de los datos.
+---
 
-Base de Datos NoSQL: Aprovechamos el poder de Firestore para un almacenamiento de datos ágil y sin problemas.
+## 🔗 Endpoints Principales
 
-Documentación Interactiva: Gracias a FastAPI, la API cuenta con una documentación Swagger UI autogenerada, perfecta para explorar y probar los endpoints de manera sencilla.
+### 🔐 Autenticación
 
-#🔗 Endpoints Clave de la API
-Aquí tienes un vistazo rápido a algunos de los endpoints más importantes:
+| Método | Endpoint         | Descripción                      |
+| ------ | ---------------- | -------------------------------- |
+| POST   | `/auth/register` | Registro de usuario              |
+| POST   | `/auth/login`    | Login mediante token de Firebase |
 
-#🔐 Autenticación
-POST /auth/register: Registra un nuevo usuario con email y contraseña.
+### 📝 Encuestas
 
-POST /auth/login: Inicia sesión validando un token de Firebase.
+| Método | Endpoint                                     | Descripción                      |
+| ------ | -------------------------------------------- | -------------------------------- |
+| GET    | `/encuestas/`                                | Listado de encuestas del usuario |
+| POST   | `/encuestas/`                                | Crear encuesta                   |
+| GET    | `/encuestas/{idEncuesta}`                    | Obtener encuesta por ID          |
+| PUT    | `/encuestas/{idEncuesta}`                    | Actualizar encuesta              |
+| DELETE | `/encuestas/{idEncuesta}`                    | Eliminar encuesta                |
+| GET    | `/encuestas/{idEncuesta}/public`             | Ver encuesta pública             |
+| GET    | `/encuestas/{idEncuesta}/resultados/resumen` | Resumen estadístico              |
 
-#📝 Encuestas
-GET /encuestas/: Obtiene todas las encuestas del usuario autenticado.
+### 📈 Respuestas
 
-POST /encuestas/: Crea una nueva encuesta.
+| Método | Endpoint                                         | Descripción                      |
+| ------ | ------------------------------------------------ | -------------------------------- |
+| GET    | `/respuestas/`                                   | Respuestas del usuario           |
+| POST   | `/respuestas/`                                   | Enviar respuesta (autenticado)   |
+| GET    | `/respuestas/encuesta/{idEncuesta}`              | Respuestas privadas por encuesta |
+| POST   | `/respuestas/encuesta/{idEncuesta}/public`       | Responder encuesta pública       |
+| GET    | `/respuestas/encuesta/{idEncuesta}/public/items` | Ver respuestas públicas          |
 
-GET /encuestas/{idEncuesta}: Obtiene una encuesta por su ID.
+### 📈 Dashboards
 
-PUT /encuestas/{idEncuesta}: Actualiza una encuesta existente.
+| Método | Endpoint                     | Descripción         |
+| ------ | ---------------------------- | ------------------- |
+| POST   | `/dashboards`                | Crear dashboard     |
+| GET    | `/dashboards/{dashboard_id}` | Consultar dashboard |
 
-DELETE /encuestas/{idEncuesta}: Elimina una encuesta.
+---
 
-GET /encuestas/{idEncuesta}/public: Accede a una encuesta pública (sin autenticación).
+## 🖃️ Esquemas de Datos
 
-GET /encuestas/{idEncuesta}/resultados/resumen: Obtiene un resumen estadístico de los resultados de una encuesta.
+### 🔐 Autenticación
 
-#📊 Respuestas
-GET /respuestas/: Consulta todas las respuestas del usuario autenticado.
+- **RegisterUser:** `{ email, password, name }`
+- **FirebaseToken:** `{ token }`
 
-POST /respuestas/: Envía una nueva respuesta a una encuesta (requiere autenticación).
+### 📝 Encuestas
 
-GET /respuestas/encuesta/{idEncuesta}: Obtiene las respuestas de una encuesta específica para el usuario autenticado.
+- **Encuesta-Input:** `{ idEncuesta, idPersona, nombre, estadoEncuesta, estadoLogico, fechaCreacion, preguntas }`
+- **Encuesta-Output:** `{ idEncuesta, titulo, preguntas (con opciones) }`
 
-POST /respuestas/encuesta/{idEncuesta}/public: Registra una respuesta a una encuesta pública (anónima).
+### 📈 Respuestas
 
-GET /respuestas/encuesta/{idEncuesta}/public/items: Accede a todas las respuestas anónimas de una encuesta pública.
+- **Respuesta Autenticada:** `{ idRespuesta, idEncuesta, idPersona, respuestas: [RespuestaPregunta], fechaRespuesta }`
+- **Respuesta Pública:** `{ respuestas: [ { preguntaId, valor } ] }`
 
-#📈 Dashboards
-POST /dashboards: Crea un nuevo dashboard personalizado.
+### 📈 Dashboards
 
-GET /dashboards/{dashboard_id}: Obtiene un dashboard por su ID.
+- **DashboardModel:** `{ usuarioId, encuestaId, widgets, dashboardId?, nombre? }`
+- **WidgetConfig:** `{ preguntaId, tipoGrafico, configuracion }`
 
-#📦 Esquemas de Datos
-La API utiliza modelos de datos claros y bien definidos para cada interacción:
+---
 
-RegisterUser: Para el registro (email, password, name).
+## 🛠️ Instalación y Configuración Local
 
-FirebaseToken: Para el inicio de sesión (token).
+### 1️⃣ Clonar el repositorio
 
-Encuesta-Input: Para crear/actualizar encuestas (incluye idEncuesta, idPersona, nombre, estadoEncuesta, estadoLogico, fechaCreacion, fechaModificacion, preguntas).
-
-Encuesta-Output: Representación pública de una encuesta (idEncuesta, titulo, preguntas con opciones).
-
-Pregunta-Input: Define una pregunta de encuesta (idPregunta, nombre, texto, tipo, items para selección).
-
-Pregunta-Output: Pregunta para encuestas públicas (idPregunta, texto, tipo, opciones).
-
-models__respuesta_model__Respuesta: Para respuestas autenticadas (idRespuesta, idEncuesta, idPersona, respuestas - lista de RespuestaPregunta, fechaRespuesta).
-
-models__respuesta_model__RespuestaPregunta: Detalle de una respuesta a una pregunta (idPregunta, idItem).
-
-models__schemas__Respuesta: Estructura para respuestas públicas (lista de respuestas tipo models__schemas__RespuestaPregunta).
-
-models__schemas__RespuestaPregunta: Detalle de una respuesta pública (preguntaId, valor).
-
-DashboardModel: Para crear dashboards (usuarioId, encuestaId, widgets, y opcionales dashboardId, nombre).
-
-WidgetConfig: Configuración de un widget de dashboard (preguntaId, tipoGrafico, configuracion).
-
-#🛠️ Instalación y Configuración Local
-Sigue estos sencillos pasos para poner en marcha el backend en tu máquina:
-
-Clona el Repositorio:
-
-Bash
-
+```bash
 git clone https://github.com/miyofrank/backend_survey.git
 cd backend_survey
-Crea y Activa un Entorno Virtual:
-Es una buena práctica para gestionar las dependencias del proyecto.
+```
 
-Bash
+### 2️⃣ Crear un entorno virtual
 
+```bash
 python -m venv venv
-# En Windows:
+# En Windows
 .\venv\Scripts\activate
-# En macOS/Linux:
+# En macOS/Linux
 source venv/bin/activate
-Instala las Dependencias:
-Asegúrate de que tu proyecto tenga un archivo requirements.txt con todas las bibliotecas necesarias (FastAPI, Uvicorn, firebase-admin, etc.).
+```
 
-Bash
+### 3️⃣ Instalar dependencias
 
+```bash
 pip install -r requirements.txt
-Configuración de Firebase:
+```
 
-Crea un Proyecto en Firebase: Dirígete a la Firebase Console y crea un nuevo proyecto.
+---
 
-Genera una Clave de Cuenta de Servicio: En tu proyecto de Firebase, ve a Configuración del proyecto > Cuentas de servicio. Haz clic en "Generar nueva clave privada" y descarga el archivo JSON.
+## 🔧 Configuración de Firebase
 
-Guarda el Archivo de Credenciales: Coloca este archivo JSON en una ubicación segura en tu máquina.
+1. **Crea un proyecto en **[**Firebase Console**](https://console.firebase.google.com/)**.**
 
-Configura la Variable de Entorno: Establece la variable de entorno GOOGLE_APPLICATION_CREDENTIALS para que apunte a la ruta de tu archivo JSON de credenciales. Importante: ¡No subas este archivo a tu repositorio público!
+2. **Genera una clave privada:**
 
-Bash
+   - Ir a **Configuración del Proyecto > Cuentas de servicio > Generar nueva clave privada**.
+   - Descarga y guarda el archivo `.json`.
 
-# Ejemplo en Windows (reemplaza la ruta):
-set GOOGLE_APPLICATION_CREDENTIALS="C:\Users\TuUsuario\Documents\tu-proyecto-firebase-adminsdk.json"
-# Ejemplo en macOS/Linux (reemplaza la ruta):
-export GOOGLE_APPLICATION_CREDENTIALS="/home/tu_usuario/documentos/tu-proyecto-firebase-adminsdk.json"
-Ejecuta la Aplicación:
-Una vez que todo esté configurado, puedes iniciar el servidor FastAPI.
+3. **Configura la variable de entorno:**
 
-Bash
+```bash
+# Windows
+set GOOGLE_APPLICATION_CREDENTIALS="C:\ruta\a\tu-clave-firebase.json"
 
+# macOS / Linux
+export GOOGLE_APPLICATION_CREDENTIALS="/ruta/a/tu-clave-firebase.json"
+```
+
+> ⚠️ **Importante:** No subas el archivo de credenciales a tu repositorio.
+
+---
+
+## 🚀 Ejecución local
+
+```bash
 uvicorn main:app --reload
-El backend estará accesible en http://127.0.0.1:8000.
+```
 
-Accede a la Documentación Interactiva:
+La API estará disponible en:
+
+- [**http://127.0.0.1:8000**](http://127.0.0.1:8000)
+- **Documentación Swagger:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+---
+
+## 🔑 Autenticación
+
+Para acceder a los endpoints protegidos, debes obtener un **JWT** tras iniciar sesión con:
+
+```http
+POST /auth/login
+```
+
+El token de Firebase se convierte en un JWT válido para las rutas privadas.
+
+---
+
+## 📂 Estructura del Proyecto
+
+```
+backend_survey/
+🕹️ auth/               # Lógica de autenticación Firebase
+🕹️ controllers/        # Lógica de negocio
+🕹️ firebase/           # Inicialización de Firestore
+🕹️ models/             # Modelos y esquemas de datos
+🕹️ routes/             # Rutas de la API
+🕹️ services/           # Servicios auxiliares (dashboards, etc)
+🕹️ main.py              # Punto de entrada FastAPI
+🕹️ README.md           # Este archivo
+```
+
+---
+
+## 🧲 Testing
+
+Puedes probar todos los endpoints desde:
+
+- **Swagger UI**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+---
+
+## 📬 Contacto
+
+Desarrollado por **Frank Cruz**\
+📧 [miyofrank@gmail.com](mailto\:miyofrank@gmail.com)\
+🔗 [GitHub](https://github.com/miyofrank/backend_survey)
 Visita http://127.0.0.1:8000/docs en tu navegador para interactuar con la API a través de Swagger UI.
 
 🔑 Uso de la API
