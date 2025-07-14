@@ -7,10 +7,9 @@ def get_all_by_user(uid: str):
     docs = db.collection("respuestas").where("idPersona", "==", uid).stream()
     return [doc.to_dict() for doc in docs]
 
-def get_by_encuesta_and_user(idEncuesta: str, uid: str):
-    docs = db.collection("respuestas")\
-        .where("idEncuesta", "==", idEncuesta)\
-        .where("idPersona", "==", uid)\
+def get_by_encuesta(idEncuesta: str):
+    docs = db.collection("respuestas") \
+        .where("idEncuesta", "==", idEncuesta) \
         .stream()
     return [doc.to_dict() for doc in docs]
 

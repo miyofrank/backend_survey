@@ -3,22 +3,20 @@ from fastapi import APIRouter, Depends, Request
 from controllers import respuesta_controller
 from models.respuesta_model import Respuesta
 from auth.auth_bearer import JWTBearer
+from controllers.respuesta_controller import get_by_encuesta_controller
 
 # Quitamos el prefix aquí para que no se duplique al incluirlo en main.py
 router = APIRouter(
+    prefix="/respuestas",
     tags=["Respuestas"],
-    dependencies=[Depends(JWTBearer())]
+    dependencies=[Depends(JWTBearer())],
 )
 
-@router.get("/encuesta/{idEncuesta}", summary="Obtener respuestas de una encuesta específica para el usuario autenticado")
-def get_by_encuesta(idEncuesta: str, request: Request):
-    uid = request.state.user["uid"]
-    return respuesta_controller.get_by_encuesta(idEncuesta, uid)
-
-@router.get("/", summary="Obtener todas las respuestas del usuario autenticado")
-def get_all(request: Request):
-    uid = request.state.user["uid"]
-    return respuesta_controller.get_all(uid)
+@router.get("/encuesta/{idEncuesta}", summary="Obtener todas las respuestas de una encuesta")
+def respuestas_por_encuesta(idEncuesta: str, request: Request):
+    # request.state.user["uid"] ya está validado por JWTBearer(), 
+    # pero no lo usamos para filtrar aquí
+    return get_by_encuesta_controller(idEncuesta)
 
 @router.post("/", summary="Crear una nueva respuesta")
 def create(respuesta: Respuesta, request: Request):
