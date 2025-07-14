@@ -34,32 +34,35 @@ def delete(idEncuesta: str, uid: str):
     encuesta_service.delete(idEncuesta, uid)
     return {"message": "Encuesta eliminada"}
 
-def obtener_encuesta_publica(idEncuesta: str):
+def obtener_encuesta_publica(idEncuesta: str) -> PublicEncuesta:
     raw = get_encuesta_by_id(idEncuesta)
     if not raw:
         raise HTTPException(status_code=404, detail="Encuesta no encontrada")
 
-    # Asegurar IDs únicos y no nulos en las preguntas
     preguntas = []
-    for idx, p in enumerate(raw.get("preguntas", [])):
-        # Generar fallback de idPregunta si viene null, undefined o duplicado
-        qid = p.get("idPregunta") or f"pregunta-{idx}"
+    for p in raw.get("preguntas", []):
+        qid = p.get("idPregunta")
+        if not qid:
+            # Abortamos para mantener la consistencia
+            raise HTTPException(
+                status_code=500,
+                detail=f"Pregunta sin 'idPregunta' detectada en la encuesta {idEncuesta}"
+            )
         opciones = [Opcion(texto=o.get("contenido", "")) for o in p.get("items", [])]
         preguntas.append(
             PublicPregunta(
-                id=qid,
+                idPregunta=qid,
                 texto=p.get("texto", ""),
                 tipo=p.get("tipo", ""),
                 opciones=opciones
             )
         )
 
-    public = PublicEncuesta(
-        id=raw.get("id", ""),
-        titulo=raw.get("nombre", ""),   # renombramos 'nombre' → 'titulo'
+    return PublicEncuesta(
+        idEncuesta=idEncuesta,
+        titulo=raw.get("nombre", ""),
         preguntas=preguntas
     )
-    return public
     
 def obtener_resumen_encuesta(idEncuesta: str):
     return calcular_resumen_respuestas(idEncuesta)

@@ -5,13 +5,13 @@ class Opcion(BaseModel):
     texto: str
 
 class Pregunta(BaseModel):
-    id: str
+    idPregunta: str       # ✅ obligatorio
     texto: str
     tipo: str
     opciones: Optional[List[Opcion]] = []
 
 class Encuesta(BaseModel):
-    id: str
+    idEncuesta: str       # ✅ antes era `id`
     titulo: str
     preguntas: List[Pregunta]
 
