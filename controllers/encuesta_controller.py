@@ -38,24 +38,21 @@ def obtener_encuesta_publica(idEncuesta: str) -> PublicEncuesta:
     raw = get_encuesta_by_id(idEncuesta)
     if not raw:
         raise HTTPException(status_code=404, detail="Encuesta no encontrada")
-
     preguntas = []
-    for p in raw.get("preguntas", []):
+    for idx_pregunta, p in enumerate(raw.get("preguntas", [])):
         qid = p.get("idPregunta")
         if not qid:
-            # Abortamos para mantener la consistencia
             raise HTTPException(
                 status_code=500,
                 detail=f"Pregunta sin 'idPregunta' detectada en la encuesta {idEncuesta}"
             )
-    opciones = []
-    for idx, o in enumerate(p.get("items", [])):
-        opciones.append(Opcion(
-            idOpcion=f"item-{p.get('index', idx)}-{idx}",
-            texto=o.get("contenido") or o.get("texto") or ""
-        ))
-
-
+        
+        opciones = []
+        for idx_opcion, o in enumerate(p.get("items", [])):
+            opciones.append(Opcion(
+                idOpcion=f"item-{idx_pregunta}-{idx_opcion}",
+                texto=o.get("contenido") or o.get("texto") or ""
+            ))
         preguntas.append(
             PublicPregunta(
                 idPregunta=qid,
@@ -64,13 +61,12 @@ def obtener_encuesta_publica(idEncuesta: str) -> PublicEncuesta:
                 opciones=opciones
             )
         )
-
     return PublicEncuesta(
         idEncuesta=idEncuesta,
         titulo=raw.get("nombre", ""),
         preguntas=preguntas
     )
-    
+  
 def obtener_resumen_encuesta(idEncuesta: str):
     return calcular_resumen_respuestas(idEncuesta)
 
