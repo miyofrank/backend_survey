@@ -19,9 +19,25 @@ def create(respuesta: Respuesta):
     return respuesta
 
 def guardar_respuesta_firestore(idEncuesta, respuesta_id, respuesta_obj, timestamp):
-    db.collection("respuestas").document(idEncuesta).collection("items").document(respuesta_id).set({
+    # 1) nested collection (opcional)
+    db.collection("respuestas")\
+      .document(idEncuesta)\
+      .collection("items")\
+      .document(respuesta_id)\
+      .set({
         "timestamp": timestamp,
         "respuestas": [r.dict() for r in respuesta_obj.respuestas]
+    })
+
+    # ✅ 2) colección raíz para listado
+    db.collection("respuestas")\
+      .document(respuesta_id)\
+      .set({
+        "idRespuesta": respuesta_id,
+        "idEncuesta": idEncuesta,
+        "idPersona": respuesta_obj.idPersona or "public",
+        "respuestas": [r.dict() for r in respuesta_obj.respuestas],
+        "fechaRespuesta": timestamp
     })
 
 def calcular_resumen_respuestas(idEncuesta: str):
