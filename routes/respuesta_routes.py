@@ -7,7 +7,6 @@ from controllers.respuesta_controller import get_by_encuesta_controller
 
 # Quitamos el prefix aquí para que no se duplique al incluirlo en main.py
 router = APIRouter(
-    prefix="/respuestas",
     tags=["Respuestas"],
     dependencies=[Depends(JWTBearer())],
 )
