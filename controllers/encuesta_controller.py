@@ -45,31 +45,30 @@ def obtener_encuesta_publica(idEncuesta: str) -> PublicEncuesta:
         if not qid:
             raise HTTPException(
                 status_code=500,
-                detail=f"Pregunta sin 'idPregunta' detectada en la encuesta {idEncuesta}"
+                detail=f"Pregunta sin 'idPregunta' en la encuesta {idEncuesta}"
             )
 
-        # Generar opciones con idOpcion al vuelo
+        # Generar las opciones con idOpcion
         opciones = []
-        for idx_opcion, o in enumerate(p.get("items", [])):
-            opciones.append(Opcion(
-                idOpcion=f"item-{idx_pregunta}-{idx_opcion}",
-                texto=o.get("contenido", "")
-            ))
+        for idx_opcion, o in enumerate(p.get("opciones", [])):
+            opciones.append({
+                "idOpcion": f"item-{idx_pregunta}-{idx_opcion}",
+                "texto": o.get("texto", "")
+            })
 
-        preguntas.append(
-            PublicPregunta(
-                idPregunta=qid,
-                texto=p.get("texto", ""),
-                tipo=p.get("tipo", ""),
-                opciones=opciones
-            )
-        )
+        preguntas.append({
+            "idPregunta": qid,
+            "texto": p.get("texto", ""),
+            "tipo": p.get("tipo", ""),
+            "opciones": opciones
+        })
 
-    return PublicEncuesta(
-        idEncuesta=idEncuesta,
-        titulo=raw.get("nombre", ""),
-        preguntas=preguntas
-    )
+    return {
+        "idEncuesta": idEncuesta,
+        "titulo": raw.get("titulo", raw.get("nombre", "")),
+        "preguntas": preguntas
+    }
+
 
     
 def obtener_resumen_encuesta(idEncuesta: str):
