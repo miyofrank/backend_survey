@@ -70,3 +70,18 @@ def guardar_respuesta_publica(idEncuesta, respuesta_id, respuesta_obj, timestamp
         "respuestas": [r.dict() for r in respuesta_obj.respuestas],
         "fechaRespuesta": timestamp
     })
+
+def get_items_publicos(idEncuesta: str):
+    """
+    Lee los documentos bajo:
+      respuestas/{idEncuesta}/items/{respuestaId}
+    y devuelve la lista de {timestamp, respuestas: […]}.
+    """
+    items = (
+        db
+        .collection("respuestas")
+        .document(idEncuesta)
+        .collection("items")
+        .stream()
+    )
+    return [doc.to_dict() for doc in items]
